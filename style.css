@@ -325,15 +325,18 @@ main{max-width:1040px;margin:0 auto;padding:16px;}
 .game-delay-meter em{position:absolute;inset:0;display:grid;place-items:center;font-size:.65rem;font-style:normal;font-weight:700;color:#314366;}
 .game-character{position:absolute;left:18%;bottom:36px;font-size:2.5rem;line-height:1;z-index:2;transform-origin:center bottom;}
 .game-character span{display:block;transform:scaleX(-1);}
-.game-character.is-jumping{animation:jump .9s ease-in-out;}
-@keyframes jump{0%,100%{transform:translateY(0)}48%{transform:translateY(-76px)}}
-.game-character.is-late-jump{animation:lateJump .65s ease-in-out;}
+.game-character.is-jumping{animation:jump 1.05s ease-in-out;}
+@keyframes jump{0%,100%{transform:translateY(0)}22%,78%{transform:translateY(-80px)}}
+.game-character.is-late-jump{animation:lateJump .75s ease-in-out;}
 @keyframes lateJump{0%,100%{transform:translateY(0)}48%{transform:translateY(-20px)}}
 .game-character.is-hit{animation:gameHit .42s ease;}
 @keyframes gameHit{0%{transform:none}35%{transform:translateX(-9px) rotate(-18deg)}100%{transform:none}}
 .game-obstacle{position:absolute;right:-38px;bottom:38px;color:#c65d32;font-size:2rem;line-height:1;z-index:1;}
-.game-obstacle.is-moving{animation:obstacleRun .95s linear forwards;}
+.game-obstacle.is-moving{animation:obstacleRun 1.15s linear forwards;}
 @keyframes obstacleRun{from{right:-38px}to{right:112%}}
+.game-stage.low-bandwidth .game-character.is-jumping{animation-timing-function:steps(5,end);}
+.game-stage.low-bandwidth .game-obstacle.is-moving{animation-timing-function:steps(8,end);}
+.game-stage.low-bandwidth::after{content:"通信速度不足：画面がカクついています";position:absolute;left:8px;bottom:6px;padding:3px 7px;border-radius:7px;background:#fff3cd;color:#765600;font-size:.66rem;font-weight:700;z-index:4;}
 .game-message{top:59%;}
 .game-stage.packet-missed{box-shadow:inset 0 0 0 3px rgba(217,83,79,.65);}
 
@@ -370,6 +373,7 @@ main{max-width:1040px;margin:0 auto;padding:16px;}
 .quality-hints>div{padding:11px;border-radius:10px;background:var(--main-soft);border:1px solid #ccd7ff;}
 .quality-hints strong{color:var(--main-dark);font-size:.88rem;}
 .quality-hints p{font-size:.82rem;line-height:1.55;margin:4px 0 0;}
+.quality-hints .importance-line{font-weight:800;color:var(--main-dark);letter-spacing:.02em;}
 .quality-hints .hint-note{grid-column:1/-1;margin:0;text-align:center;color:var(--ink-soft);}
 
 .table-wrap{overflow-x:auto;}

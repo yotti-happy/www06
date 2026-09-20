@@ -404,12 +404,17 @@ const runBtn  = $('#runBtn');
 const log     = [];
 let   running2 = false;
 
+let activePreset = 'normal';
+
 function syncOutputs() {
   $('#speedOut').textContent   = `${speedEl.value} Mbps`;
   $('#latencyOut').textContent = `${latEl.value} ms`;
   $('#lossOut').textContent    = `${lossEl.value} %`;
 }
-[speedEl, latEl, lossEl].forEach((el) => el.addEventListener('input', syncOutputs));
+[speedEl, latEl, lossEl].forEach((el) => el.addEventListener('input', () => {
+  activePreset = 'custom';
+  syncOutputs();
+}));
 syncOutputs();
 
 const PRESETS = {
@@ -421,6 +426,7 @@ const PRESETS = {
 $$('[data-preset]').forEach((b) => {
   b.addEventListener('click', () => {
     const p = PRESETS[b.dataset.preset];
+    activePreset = b.dataset.preset;
     speedEl.value = p.speed; latEl.value = p.latency; lossEl.value = p.loss;
     syncOutputs();
   });
@@ -430,7 +436,7 @@ $$('[data-preset]').forEach((b) => {
 const USES = {
   video: {
     name: '動画視聴',
-    w: { speed: 0.6, lat: 0.1, loss: 0.3 },
+    w: { speed: 0.5, lat: 0.17, loss: 0.33 },
     msg: {
       speed: '通信速度が足りず、映像が止まりやすい',
       lat:   '遅延は動画視聴にはあまり影響しない',
@@ -440,9 +446,9 @@ const USES = {
   },
   game: {
     name: 'オンラインゲーム',
-    w: { speed: 0.15, lat: 0.5, loss: 0.35 },
+    w: { speed: 0.25, lat: 0.375, loss: 0.375 },
     msg: {
-      speed: '速度は足りないが、ゲームへの影響は小さめ',
+      speed: '通信速度が足りず、画面の動きがカクつく',
       lat:   '遅延が大きく、操作の反応が遅れる',
       loss:  'パケットロスで動きが飛んだり切断されやすい',
       ok:    '反応が速く、快適に遊べそう'
@@ -450,7 +456,7 @@ const USES = {
   },
   web: {
     name: 'Web閲覧',
-    w: { speed: 0.35, lat: 0.4, loss: 0.25 },
+    w: { speed: 0.4, lat: 0.4, loss: 0.2 },
     msg: {
       speed: '通信速度が足りず、表示に時間がかかる',
       lat:   '遅延が大きく、押してから表示までが待たされる',
@@ -638,7 +644,9 @@ async function playVideoExperience() {
   const tick = 100;
   const stallCount = q.speed >= 25 ? 0 : q.speed >= 12 ? 1 : q.speed >= 5 ? 2 : 3;
   const stallPoints = [24, 52, 76].slice(0, stallCount);
-  const glitchCount = q.loss === 0 ? 0 : q.loss < 8 ? 1 : q.loss < 18 ? 2 : 3;
+  const glitchCount = activePreset === 'lossy'
+    ? 2
+    : q.loss < 5 ? 0 : q.loss < 15 ? 1 : q.loss < 25 ? 2 : 3;
   const glitchPoints = [34, 63, 84].slice(0, glitchCount);
   const usedStalls = new Set();
   const usedGlitches = new Set();
@@ -693,8 +701,12 @@ async function jumpExperience() {
   const message = $('#gameMessage');
   const delayFill = $('#gameDelayFill');
   const delayText = $('#gameDelayText');
+  const stage = $('#gameStage');
+  const lowBandwidth = activePreset === 'slow' || q.speed < 8;
 
   character.classList.remove('is-jumping', 'is-late-jump', 'is-hit');
+  stage.classList.remove('packet-missed', 'low-bandwidth');
+  stage.classList.toggle('low-bandwidth', lowBandwidth);
   obstacle.classList.remove('is-moving');
   void obstacle.offsetWidth;
   obstacle.classList.add('is-moving');
@@ -706,18 +718,24 @@ async function jumpExperience() {
   message.textContent = 'ボタンは押されました';
 
   await wait(q.latency);
-  const lost = Math.random() * 100 < q.loss;
+  const customLossChance = 1 - Math.pow(1 - q.loss / 100, 4);
+  const lost = activePreset === 'lossy' ||
+    (activePreset === 'custom' && q.loss > 0 && Math.random() < customLossChance);
   if (lost) {
     delayText.textContent = '操作が途中で消えた';
     message.textContent = '操作が届かなかった！ ジャンプしません';
-    $('#gameStage').classList.add('packet-missed');
+    stage.classList.add('packet-missed');
   } else {
     delayText.textContent = `操作が到着（${q.latency} ms）`;
     character.classList.add(q.latency >= 220 ? 'is-late-jump' : 'is-jumping');
-    message.textContent = q.latency >= 220 ? 'ジャンプしたけれど、反応が遅い！' : 'すぐにジャンプ！';
+    message.textContent = q.latency >= 220
+      ? 'ジャンプしたけれど、反応が遅い！'
+      : lowBandwidth
+        ? 'ジャンプ！ でも通信速度が低く、動きがカクつく'
+        : 'すぐにジャンプ！';
   }
 
-  await wait(Math.max(0, 680 - q.latency));
+  await wait(Math.max(0, 850 - q.latency));
   if (lost || q.latency >= 220) {
     character.classList.remove('is-jumping', 'is-late-jump');
     character.classList.add('is-hit');
@@ -728,9 +746,10 @@ async function jumpExperience() {
 
   await wait(600);
   if (lost) {
-    $('#gameStage').classList.remove('packet-missed');
+    stage.classList.remove('packet-missed');
   }
   character.classList.remove('is-jumping', 'is-late-jump', 'is-hit');
+  stage.classList.remove('low-bandwidth');
   obstacle.classList.remove('is-moving');
   delayFill.style.transitionDuration = '.15s';
   delayFill.style.width = '0%';
@@ -770,13 +789,18 @@ async function openWebExperience() {
   status.textContent = '画像を読み込み中…';
   await wait(partDelay * 1.45);
 
-  if (q.loss > 0) {
+  const customWebLossChance = 1 - Math.pow(1 - q.loss / 100, 5);
+  const webLossHappened = activePreset === 'lossy' ||
+    (activePreset === 'custom' && q.loss > 0 && Math.random() < customWebLossChance);
+  if (webLossHappened) {
     imagePart.classList.add('is-failed');
-    imagePart.innerHTML = '<span>⚠️</span><strong>画像を読み込めませんでした</strong>';
-    status.textContent = '再読み込み中…';
-    await wait(clamp(550 + q.latency + q.loss * 28, 650, 1900));
+    imagePart.innerHTML = '<span>⚠️</span><strong>画像の一部が欠けました</strong>';
+    status.textContent = '欠けたデータを再送信中…';
+    await wait(clamp(350 + q.latency * .2 + q.loss * 18, 350, 850));
     imagePart.classList.remove('is-failed');
     imagePart.innerHTML = '<span>🏫</span><strong>文化祭のイメージ</strong>';
+    status.textContent = '再送信で画像を補いました';
+    await wait(300);
   }
 
   imagePart.classList.add('is-loaded');
@@ -854,7 +878,7 @@ const NETWORK_RATINGS = {
   web: {
     A: { mark: '○', reason: '反応開始には少し待つが、通信速度が速く画像などを短時間で受信できる。' },
     B: { mark: '◎', reason: '遅延が小さくパケットロスもないため、ページを安定して表示しやすい。' },
-    C: { mark: '△', reason: '通信速度は速いが、パケットロスで画像の再読み込みが起こる可能性がある。' }
+    C: { mark: '○', reason: 'パケットロスで再送信が起こることはあるが、通信速度が速く遅延も小さいため、比較的快適に表示できる。' }
   }
 };
 const BASIS = ['通信速度', '遅延', 'パケットロス'];

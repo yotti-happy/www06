@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>パケット通信と通信品質シミュレーター｜情報Ⅰ</title>
-<link rel="stylesheet" href="style.css?v=20260920-4">
+<link rel="stylesheet" href="style.css?v=20260920-5">
 </head>
 <body>
 
@@ -264,7 +264,7 @@
           <div class="game-message" id="gameMessage" role="status">「ジャンプ！」を押してみよう</div>
         </div>
         <button class="btn btn-primary experience-action" id="jumpBtn">ジャンプ！</button>
-        <p class="condition-note">通信速度の影響は小さめ。遅延とパケットロスに注目しよう。</p>
+        <p class="condition-note">一定の通信速度も必要。特に遅延とパケットロスの影響が大きい。</p>
         <fieldset class="feeling hidden" id="gameFeeling">
           <legend>どんな感じだった？</legend>
           <div class="feeling-options" data-feeling-for="game">
@@ -323,9 +323,9 @@
     </label>
     <div class="btn-row"><button class="btn btn-soft" id="showQualityHint" type="button" aria-expanded="false">ヒントを見る</button></div>
     <div class="quality-hints hidden" id="qualityHints">
-      <div><strong>🎬 動画視聴</strong><p>通信速度とパケットロスの影響を受けやすい。高画質の動画では多くのデータを連続して受信する必要があります。</p></div>
-      <div><strong>🎮 オンラインゲーム</strong><p>遅延とパケットロスの影響を受けやすい。ボタン操作への反応の速さが重要です。</p></div>
-      <div><strong>🌐 Web閲覧</strong><p>通信速度と遅延の両方が影響する。ページを開くまでの反応と、画像などのデータ転送速度が関係します。</p></div>
+      <div><strong>🎬 動画視聴</strong><p class="importance-line">通信速度 ◎　遅延 △　パケットロス ○</p><p>大容量のデータを続けて受信するため、特に通信速度が重要です。ロスは映像の乱れ、遅延は再生開始までの待ち時間に影響します。</p></div>
+      <div><strong>🎮 オンラインゲーム</strong><p class="importance-line">通信速度 ○　遅延 ◎　パケットロス ◎</p><p>一定の通信速度が必要です。特に、操作への反応の速さと、操作が確実に届くことが重要です。</p></div>
+      <div><strong>🌐 Web閲覧</strong><p class="importance-line">通信速度 ○　遅延 ○　パケットロス △</p><p>読み込み開始までの反応とデータ転送速度が関係します。ロスがあっても、多くの場合は再送信で補えます。</p></div>
       <p class="hint-note">どの体験も、1つの値だけで決まるわけではありません。</p>
     </div>
   </div>
@@ -393,6 +393,6 @@
 <!-- 印刷専用エリア（画面には表示されません） -->
 <div id="printArea" aria-hidden="true"></div>
 
-<script src="script.js?v=20260920-4"></script>
+<script src="script.js?v=20260920-5"></script>
 </body>
 </html>
