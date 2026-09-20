@@ -362,6 +362,7 @@ main{max-width:1040px;margin:0 auto;padding:16px;}
 .compare-table input{position:absolute;opacity:0;width:0;height:0;}
 .compare-table label span{display:inline-block;padding:6px 12px;border:2px solid var(--line);border-radius:999px;background:#fff;font-size:.82rem;}
 .compare-table input:checked + span{background:var(--main);border-color:var(--main);color:#fff;font-weight:700;}
+.compare-table input:checked + span::before{content:"✓ ";}
 .compare-table input:focus-visible + span{outline:3px solid #a9bcff;}
 .quality-hints{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
 .quality-hints>div{padding:11px;border-radius:10px;background:var(--main-soft);border:1px solid #ccd7ff;}
