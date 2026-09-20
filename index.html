@@ -260,6 +260,7 @@
           <div class="game-delay-meter" aria-hidden="true"><span id="gameDelayFill"></span><em id="gameDelayText">操作の伝わり方</em></div>
           <div class="game-character" id="gameCharacter" aria-hidden="true"><span>🏃</span></div>
           <div class="game-obstacle" id="gameObstacle" aria-hidden="true">🧱</div>
+          <div class="game-finish" aria-hidden="true">🏁</div>
           <div class="game-ground"></div>
           <div class="game-message" id="gameMessage" role="status">「ジャンプ！」を押してみよう</div>
         </div>
@@ -311,9 +312,9 @@
       <table class="compare-table">
         <thead><tr><th>体験</th><th>通信速度</th><th>遅延</th><th>パケットロス</th></tr></thead>
         <tbody>
-          <tr><th scope="row">🎬 動画視聴</th><td><button type="button" class="impact-choice" data-value="通信速度" aria-pressed="false">＋ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="遅延" aria-pressed="false">＋ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="パケットロス" aria-pressed="false">＋ 選ぶ</button></td></tr>
-          <tr><th scope="row">🎮 オンラインゲーム</th><td><button type="button" class="impact-choice" data-value="通信速度" aria-pressed="false">＋ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="遅延" aria-pressed="false">＋ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="パケットロス" aria-pressed="false">＋ 選ぶ</button></td></tr>
-          <tr><th scope="row">🌐 Web閲覧</th><td><button type="button" class="impact-choice" data-value="通信速度" aria-pressed="false">＋ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="遅延" aria-pressed="false">＋ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="パケットロス" aria-pressed="false">＋ 選ぶ</button></td></tr>
+          <tr><th scope="row">🎬 動画視聴<span class="impact-count">0個選択</span></th><td><button type="button" class="impact-choice" data-value="通信速度" aria-pressed="false">□ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="遅延" aria-pressed="false">□ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="パケットロス" aria-pressed="false">□ 選ぶ</button></td></tr>
+          <tr><th scope="row">🎮 オンラインゲーム<span class="impact-count">0個選択</span></th><td><button type="button" class="impact-choice" data-value="通信速度" aria-pressed="false">□ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="遅延" aria-pressed="false">□ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="パケットロス" aria-pressed="false">□ 選ぶ</button></td></tr>
+          <tr><th scope="row">🌐 Web閲覧<span class="impact-count">0個選択</span></th><td><button type="button" class="impact-choice" data-value="通信速度" aria-pressed="false">□ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="遅延" aria-pressed="false">□ 選ぶ</button></td><td><button type="button" class="impact-choice" data-value="パケットロス" aria-pressed="false">□ 選ぶ</button></td></tr>
         </tbody>
       </table>
     </div>
