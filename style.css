@@ -320,9 +320,9 @@ main{max-width:1040px;margin:0 auto;padding:16px;}
 .game-stage{background:linear-gradient(#dcedff 0 76%,#d8f0cc 76%);}
 .game-ground{position:absolute;left:0;right:0;bottom:35px;height:3px;background:#557e48;}
 .game-goal{position:absolute;top:8px;left:10px;font-size:.72rem;font-weight:700;color:#36527e;}
-.game-delay-meter{position:absolute;top:32px;left:10px;right:10px;height:22px;border-radius:999px;background:#fff;border:1px solid #bfcbe0;overflow:hidden;z-index:2;}
+.game-delay-meter{position:absolute;top:30px;left:10px;right:10px;height:30px;border-radius:10px;background:#fff;border:1px solid #bfcbe0;overflow:hidden;z-index:3;}
 .game-delay-meter span{position:absolute;inset:0 auto 0 0;width:0;background:#9fb5ef;transition:width .02s linear;}
-.game-delay-meter em{position:absolute;inset:0;display:grid;place-items:center;font-size:.65rem;font-style:normal;font-weight:700;color:#314366;}
+.game-delay-meter em{position:absolute;inset:0;display:grid;place-items:center;padding:0 8px;font-size:.7rem;font-style:normal;font-weight:700;color:#263a62;text-align:center;line-height:1.2;}
 .game-character{position:absolute;left:18%;bottom:36px;font-size:2.5rem;line-height:1;z-index:2;transform-origin:center bottom;}
 .game-character span{display:block;transform:scaleX(-1);}
 .game-character.is-jumping{animation:jump 1.05s ease-in-out;}
@@ -337,8 +337,6 @@ main{max-width:1040px;margin:0 auto;padding:16px;}
 .game-stage.low-bandwidth .game-character.is-jumping{animation-timing-function:steps(5,end);}
 .game-stage.low-bandwidth .game-obstacle.is-moving{animation-timing-function:steps(8,end);}
 .game-stage.low-bandwidth::after{content:"通信速度不足：画面がカクついています";position:absolute;left:8px;bottom:6px;padding:3px 7px;border-radius:7px;background:#fff3cd;color:#765600;font-size:.66rem;font-weight:700;z-index:4;}
-.game-message{display:flex;align-items:center;justify-content:center;min-height:40px;margin-top:7px;padding:7px 10px;border:1px solid #cbd7ed;border-radius:9px;background:#f5f8ff;color:var(--main-dark);font-size:.78rem;font-weight:700;line-height:1.35;text-align:center;}
-.game-message:empty{visibility:hidden;}
 .game-stage.packet-missed{box-shadow:inset 0 0 0 3px rgba(217,83,79,.65);}
 
 .web-browser{background:#fff;}

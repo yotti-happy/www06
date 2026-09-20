@@ -700,7 +700,6 @@ async function jumpExperience() {
   const obstacle = $('#gameObstacle');
   const message = $('#gameMessage');
   const delayFill = $('#gameDelayFill');
-  const delayText = $('#gameDelayText');
   const stage = $('#gameStage');
   const lowBandwidth = activePreset === 'slow' || q.speed < 8;
 
@@ -714,19 +713,16 @@ async function jumpExperience() {
   delayFill.style.width = '0%';
   void delayFill.offsetWidth;
   delayFill.style.width = '100%';
-  delayText.textContent = `操作を送信中… ${q.latency} ms`;
-  message.textContent = 'ボタンは押されました';
+  message.textContent = `操作を送信中…（遅延 ${q.latency} ms）`;
 
   await wait(q.latency);
   const customLossChance = 1 - Math.pow(1 - q.loss / 100, 4);
   const lost = activePreset === 'lossy' ||
     (activePreset === 'custom' && q.loss > 0 && Math.random() < customLossChance);
   if (lost) {
-    delayText.textContent = '操作が途中で消えた';
     message.textContent = '操作が届かなかった！ ジャンプしません';
     stage.classList.add('packet-missed');
   } else {
-    delayText.textContent = `操作が到着（${q.latency} ms）`;
     character.classList.add(q.latency >= 220 ? 'is-late-jump' : 'is-jumping');
     message.textContent = q.latency >= 220
       ? 'ジャンプしたけれど、反応が遅い！'
@@ -753,8 +749,8 @@ async function jumpExperience() {
   obstacle.classList.remove('is-moving');
   delayFill.style.transitionDuration = '.15s';
   delayFill.style.width = '0%';
-  delayText.textContent = `体験した遅延：${q.latency} ms ／ ロス：${q.loss}%`;
   showFeeling('game');
+  jumpBtn.textContent = '↻ もう一度ジャンプする';
   jumpPending = false;
   jumpBtn.disabled = false;
 }

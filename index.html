@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>パケット通信と通信品質シミュレーター｜情報Ⅰ</title>
-<link rel="stylesheet" href="style.css?v=20260920-6">
+<link rel="stylesheet" href="style.css?v=20260920-7">
 </head>
 <body>
 
@@ -257,12 +257,11 @@
         </div>
         <div class="game-stage" id="gameStage" aria-label="ジャンプゲーム">
           <div class="game-goal">障害物をジャンプでよけよう！</div>
-          <div class="game-delay-meter" aria-hidden="true"><span id="gameDelayFill"></span><em id="gameDelayText">操作の伝わり方</em></div>
+          <div class="game-delay-meter"><span id="gameDelayFill" aria-hidden="true"></span><em id="gameMessage" role="status">「ジャンプ！」を押してみよう</em></div>
           <div class="game-character" id="gameCharacter" aria-hidden="true"><span>🏃</span></div>
           <div class="game-obstacle" id="gameObstacle" aria-hidden="true">🧱</div>
           <div class="game-ground"></div>
         </div>
-        <div class="game-message" id="gameMessage" role="status">「ジャンプ！」を押してみよう</div>
         <button class="btn btn-primary experience-action" id="jumpBtn">ジャンプ！</button>
         <p class="condition-note">一定の通信速度も必要。特に遅延とパケットロスの影響が大きい。</p>
         <fieldset class="feeling hidden" id="gameFeeling">
@@ -393,6 +392,6 @@
 <!-- 印刷専用エリア（画面には表示されません） -->
 <div id="printArea" aria-hidden="true"></div>
 
-<script src="script.js?v=20260920-5"></script>
+<script src="script.js?v=20260920-7"></script>
 </body>
 </html>
