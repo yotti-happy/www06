@@ -694,7 +694,7 @@ async function jumpExperience() {
   const delayFill = $('#gameDelayFill');
   const delayText = $('#gameDelayText');
 
-  character.classList.remove('is-jumping', 'is-hit');
+  character.classList.remove('is-jumping', 'is-late-jump', 'is-hit');
   obstacle.classList.remove('is-moving');
   void obstacle.offsetWidth;
   obstacle.classList.add('is-moving');
@@ -713,24 +713,24 @@ async function jumpExperience() {
     $('#gameStage').classList.add('packet-missed');
   } else {
     delayText.textContent = `操作が到着（${q.latency} ms）`;
-    character.classList.add('is-jumping');
+    character.classList.add(q.latency >= 220 ? 'is-late-jump' : 'is-jumping');
     message.textContent = q.latency >= 220 ? 'ジャンプしたけれど、反応が遅い！' : 'すぐにジャンプ！';
   }
 
-  await wait(Math.max(0, 720 - q.latency));
+  await wait(Math.max(0, 680 - q.latency));
   if (lost || q.latency >= 220) {
-    character.classList.remove('is-jumping');
+    character.classList.remove('is-jumping', 'is-late-jump');
     character.classList.add('is-hit');
     message.textContent = lost ? '操作が届かず、障害物にぶつかった！' : '反応が遅れて、障害物にぶつかった！';
   } else {
-    message.textContent = 'ジャンプ成功！ 障害物をよけられた';
+    message.textContent = 'ジャンプ成功！ 障害物を飛び越えた！';
   }
 
-  await wait(850);
+  await wait(600);
   if (lost) {
     $('#gameStage').classList.remove('packet-missed');
   }
-  character.classList.remove('is-jumping', 'is-hit');
+  character.classList.remove('is-jumping', 'is-late-jump', 'is-hit');
   obstacle.classList.remove('is-moving');
   delayFill.style.transitionDuration = '.15s';
   delayFill.style.width = '0%';
@@ -797,6 +797,16 @@ $('#showQualityHint').addEventListener('click', () => {
   hints.classList.toggle('hidden', !willShow);
   $('#showQualityHint').textContent = willShow ? 'ヒントを閉じる' : 'ヒントを見る';
   $('#showQualityHint').setAttribute('aria-expanded', willShow ? 'true' : 'false');
+});
+
+/* 比較表：各ボタンは独立して選択・解除できる */
+$$('.impact-choice').forEach((button) => {
+  button.addEventListener('click', () => {
+    const selected = !button.classList.contains('is-selected');
+    button.classList.toggle('is-selected', selected);
+    button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    button.textContent = selected ? '✓ 選択中' : '＋ 選ぶ';
+  });
 });
 
 /* =========================================================
