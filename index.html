@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>パケット通信と通信品質シミュレーター｜情報Ⅰ</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="titles">
+      <p class="subject">情報Ⅰ　情報通信ネットワーク</p>
+      <h1>パケット通信と通信品質シミュレーター</h1>
+      <p class="mokuhyo">めあて：パケット通信の仕組みを知り、通信品質が変わる理由を体験しながら説明しよう。</p>
+    </div>
+    <label class="name-field">
+      氏名
+      <input type="text" id="studentName" placeholder="　　　　　　" autocomplete="off">
+    </label>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="学習の流れ">
+  <button class="tab is-active" role="tab" aria-selected="true" data-tab="t1">
+    <span class="tab-num">体験1</span><span class="tab-label">パケットに分けて送る</span>
+  </button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="t2">
+    <span class="tab-num">体験3</span><span class="tab-label">通信品質をくらべる</span>
+  </button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="t3">
+    <span class="tab-num">活用</span><span class="tab-label">どのネットワークを選ぶ？</span>
+  </button>
+</nav>
+
+<main>
+
+<!-- ===================== 体験1 ===================== -->
+<section id="t1" class="panel is-active" role="tabpanel">
+
+  <div class="card intro">
+    <h2>① データはどうやって送られる？</h2>
+    <p>大きな荷物を<strong>小包（パケット）に分けて</strong>送ると考えてみよう。パケットには「宛先」と「何番目か」の情報が付いています。
+      パケットは<strong>別々の道（経路）</strong>を通ることがあるので、届く順番は入れかわることもあります。</p>
+  </div>
+
+  <div class="card">
+    <h3>送るデータを選ぶ</h3>
+    <div class="datatype-switch" role="radiogroup" aria-label="送るデータの種類">
+      <label class="chip"><input type="radio" name="datatype" value="text" checked><span>文字メッセージ</span></label>
+      <label class="chip"><input type="radio" name="datatype" value="image"><span>画像（ドット絵）</span></label>
+    </div>
+
+    <div id="textPicker" class="picker">
+      <label class="field">
+        メッセージ（20文字くらいまで）
+        <input type="text" id="msgInput" maxlength="24" value="ネットワークはおもしろい">
+      </label>
+    </div>
+
+    <div id="imagePicker" class="picker hidden">
+      <p class="field-label">画像を選ぶ</p>
+      <div class="art-choices" id="artChoices"></div>
+    </div>
+
+    <label class="checkline">
+      <input type="checkbox" id="dropOne">
+      <span>パケットを1つ、わざと届かないようにする</span>
+    </label>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="sendBtn">送信する</button>
+      <button class="btn" id="resetBtn">はじめにもどる</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>作られたパケット</h3>
+    <p class="hint">データが分割され、1つずつに宛先と番号が付きました。</p>
+    <div class="packet-list" id="packetList"></div>
+  </div>
+
+  <div class="card">
+    <h3>ネットワークの中を通る</h3>
+    <p class="hint">パケットは3つの経路のどれかを通ります。通る道がちがうので、届く順番も変わります。</p>
+    <div class="net-wrap">
+      <svg id="netSvg" viewBox="0 0 660 270" role="img" aria-label="送信者からルータを経て受信者へパケットが流れる図">
+        <path class="route" id="routeA" d="M70,135 L250,48 L590,135"></path>
+        <path class="route" id="routeB" d="M70,135 L250,135 L590,135"></path>
+        <path class="route" id="routeC" d="M70,135 L250,222 L590,135"></path>
+
+        <g class="node">
+          <rect x="18" y="108" width="104" height="54" rx="12"></rect>
+          <text x="70" y="131">送信者</text>
+          <text x="70" y="150" class="sub">あなたの端末</text>
+        </g>
+        <g class="node router"><rect x="206" y="24" width="88" height="46" rx="12"></rect><text x="250" y="52">ルータA</text></g>
+        <g class="node router"><rect x="206" y="112" width="88" height="46" rx="12"></rect><text x="250" y="140">ルータB</text></g>
+        <g class="node router"><rect x="206" y="199" width="88" height="46" rx="12"></rect><text x="250" y="227">ルータC</text></g>
+        <g class="node">
+          <rect x="538" y="108" width="104" height="54" rx="12"></rect>
+          <text x="590" y="131">受信者</text>
+          <text x="590" y="150" class="sub">相手の端末</text>
+        </g>
+
+        <g id="packetLayer"></g>
+      </svg>
+    </div>
+    <p class="status" id="sendStatus">「送信する」を押してみよう。</p>
+  </div>
+
+  <div class="card">
+    <h3>受信側で元にもどす</h3>
+    <div class="arrive-grid">
+      <div>
+        <h4>届いた順番</h4>
+        <div class="arrive-box" id="arriveBox"><p class="empty">まだ何も届いていません。</p></div>
+      </div>
+      <div>
+        <h4>復元したデータ</h4>
+        <div class="restore-box">
+          <p class="restore-caption">届いた順のまま並べると…</p>
+          <div class="restore-view" id="restoreRaw"><span class="empty">―</span></div>
+          <p class="restore-caption">番号順に並べ直すと…</p>
+          <div class="restore-view ok" id="restoreSorted"><span class="empty">―</span></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="sortBtn" disabled>番号順に並べ直す</button>
+          <button class="btn hidden" id="resendBtn">届かなかったパケットを再送する</button>
+        </div>
+        <p class="status" id="restoreStatus"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card point">
+    <h3>ここがポイント</h3>
+    <ul>
+      <li>データは<strong>パケット</strong>に分けて送られる。パケットには<strong>宛先</strong>と<strong>番号</strong>が付いている。</li>
+      <li>経路は1つに決まっていない。順番が入れかわっても、<strong>番号順に並べ直せば</strong>元にもどる。</li>
+      <li>1つでも届かないと元にもどらないので、<strong>再送</strong>のしくみが必要になる。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== 体験3 ===================== -->
+<section id="t2" class="panel" role="tabpanel">
+
+  <div class="card intro">
+    <h2>② 通信品質を決める3つの値</h2>
+    <div class="term-grid">
+      <div class="term"><span class="term-name">通信速度</span><span class="term-desc">一度に運べるデータの量（Mbps）</span></div>
+      <div class="term"><span class="term-name">遅延</span><span class="term-desc">反応が返ってくるまでの時間（ms）</span></div>
+      <div class="term"><span class="term-name">パケットロス</span><span class="term-desc">途中で届かなかった割合（％）</span></div>
+    </div>
+    <p class="hint">条件は<strong>1つずつ</strong>変えてくらべよう。</p>
+  </div>
+
+  <div class="card">
+    <h3>ネットワークの条件を変える</h3>
+
+    <div class="slider-row">
+      <label for="speed">通信速度</label>
+      <input type="range" id="speed" min="1" max="100" step="1" value="50">
+      <output id="speedOut">50 Mbps</output>
+    </div>
+    <div class="slider-row">
+      <label for="latency">遅延</label>
+      <input type="range" id="latency" min="0" max="500" step="10" value="20">
+      <output id="latencyOut">20 ms</output>
+    </div>
+    <div class="slider-row">
+      <label for="loss">パケットロス</label>
+      <input type="range" id="loss" min="0" max="30" step="1" value="0">
+      <output id="lossOut">0 %</output>
+    </div>
+
+    <p class="field-label">条件のプリセット</p>
+    <div class="preset-row">
+      <button class="btn btn-soft" data-preset="normal">ふつう</button>
+      <button class="btn btn-soft" data-preset="slow">① 速度を下げる</button>
+      <button class="btn btn-soft" data-preset="delay">② 遅延を大きくする</button>
+      <button class="btn btn-soft" data-preset="lossy">③ ロスを発生させる</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="runBtn">同じデータを送信する（2MB）</button>
+    </div>
+
+    <div class="lane-wrap">
+      <span class="lane-end">送信</span>
+      <div class="lane" id="lane"><div class="lane-line"></div></div>
+      <span class="lane-end">受信</span>
+    </div>
+
+    <div class="result-grid">
+      <div class="result">
+        <span class="result-label">送信にかかった時間</span>
+        <span class="result-value" id="rTime">―</span>
+      </div>
+      <div class="result">
+        <span class="result-label">反応までの時間</span>
+        <span class="result-value" id="rRtt">―</span>
+      </div>
+      <div class="result">
+        <span class="result-label">届かなかったパケット数</span>
+        <span class="result-value" id="rLost">―</span>
+        <span class="result-sub">／ 全200個</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card experience-section">
+    <h3>この条件だと、どう感じる？</h3>
+    <p class="hint">同じネットワークでも、使う場面によって「快適さ」はちがいます。条件を変えたら、もう一度試してみよう。</p>
+
+    <div class="experience-grid">
+      <article class="experience-card" aria-labelledby="videoTitle">
+        <div class="experience-heading">
+          <span class="experience-icon" aria-hidden="true">🎬</span>
+          <div><h4 id="videoTitle">動画視聴</h4><p>再生開始や映像の止まり方に注目</p></div>
+        </div>
+        <div class="video-player" id="videoPlayer" aria-label="疑似動画プレーヤー">
+          <div class="video-sky"><span class="video-cloud cloud-a">☁</span><span class="video-cloud cloud-b">☁</span></div>
+          <div class="video-character" id="videoCharacter" aria-hidden="true">🚲</div>
+          <div class="video-message" id="videoMessage" role="status">再生ボタンを押してください</div>
+          <div class="video-progress" aria-hidden="true"><span id="videoProgress"></span></div>
+        </div>
+        <button class="btn btn-primary experience-action" id="playVideoBtn">▶ 再生する</button>
+        <p class="condition-note" id="videoCondition">現在の通信条件を使って再生します。</p>
+        <fieldset class="feeling hidden" id="videoFeeling">
+          <legend>どんな感じだった？</legend>
+          <div class="feeling-options" data-feeling-for="video">
+            <button type="button" class="feeling-btn" data-value="快適">😊 快適</button>
+            <button type="button" class="feeling-btn" data-value="少し気になる">😐 少し気になる</button>
+            <button type="button" class="feeling-btn" data-value="使いにくい">😣 使いにくい</button>
+          </div>
+        </fieldset>
+      </article>
+
+      <article class="experience-card" aria-labelledby="gameTitle">
+        <div class="experience-heading">
+          <span class="experience-icon" aria-hidden="true">🎮</span>
+          <div><h4 id="gameTitle">オンラインゲーム</h4><p>押してから動くまでの時間に注目</p></div>
+        </div>
+        <div class="game-stage" id="gameStage" aria-label="ジャンプゲーム">
+          <div class="game-target" aria-hidden="true">★</div>
+          <div class="game-character" id="gameCharacter" aria-hidden="true">●</div>
+          <div class="game-ground"></div>
+          <div class="game-message" id="gameMessage" role="status">「ジャンプ！」を押してみよう</div>
+        </div>
+        <button class="btn btn-primary experience-action" id="jumpBtn">ジャンプ！</button>
+        <p class="condition-note">通信速度の影響は小さめ。遅延とパケットロスに注目しよう。</p>
+        <fieldset class="feeling hidden" id="gameFeeling">
+          <legend>どんな感じだった？</legend>
+          <div class="feeling-options" data-feeling-for="game">
+            <button type="button" class="feeling-btn" data-value="快適">😊 快適</button>
+            <button type="button" class="feeling-btn" data-value="少し気になる">😐 少し気になる</button>
+            <button type="button" class="feeling-btn" data-value="使いにくい">😣 使いにくい</button>
+          </div>
+        </fieldset>
+      </article>
+
+      <article class="experience-card" aria-labelledby="webTitle">
+        <div class="experience-heading">
+          <span class="experience-icon" aria-hidden="true">🌐</span>
+          <div><h4 id="webTitle">Web閲覧</h4><p>読み込み開始と完成までの時間に注目</p></div>
+        </div>
+        <div class="web-browser" id="webBrowser" aria-label="疑似Webページ">
+          <div class="browser-bar"><i></i><i></i><i></i><span>school-news.example</span></div>
+          <div class="web-page">
+            <h5 class="web-part" id="webHeading">学校ニュース</h5>
+            <p class="web-part" id="webText">文化祭に向けて、各クラスの準備が進んでいます。</p>
+            <div class="web-image web-part" id="webImage"><span>🏫</span><strong>文化祭のイメージ</strong></div>
+            <div class="web-status" id="webStatus" role="status">「ページを開く」を押してください</div>
+          </div>
+        </div>
+        <button class="btn btn-primary experience-action" id="openWebBtn">ページを開く</button>
+        <p class="condition-note">タイトル → 文章 → 画像の順に読み込みます。</p>
+        <fieldset class="feeling hidden" id="webFeeling">
+          <legend>どんな感じだった？</legend>
+          <div class="feeling-options" data-feeling-for="web">
+            <button type="button" class="feeling-btn" data-value="快適">😊 快適</button>
+            <button type="button" class="feeling-btn" data-value="少し気になる">😐 少し気になる</button>
+            <button type="button" class="feeling-btn" data-value="使いにくい">😣 使いにくい</button>
+          </div>
+        </fieldset>
+      </article>
+    </div>
+  </div>
+
+  <div class="card reflection-card">
+    <h3>3つの体験をくらべよう</h3>
+    <p class="reflection-question">どの通信品質が特に影響したと思う？</p>
+    <p class="hint">体験ごとに、最も気になったものを1つ選びましょう。ほかの値も影響する場合があります。</p>
+    <div class="table-wrap">
+      <table class="compare-table">
+        <thead><tr><th>体験</th><th>通信速度</th><th>遅延</th><th>パケットロス</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">🎬 動画視聴</th><td><label><input type="radio" name="impactVideo" value="通信速度"><span>選ぶ</span></label></td><td><label><input type="radio" name="impactVideo" value="遅延"><span>選ぶ</span></label></td><td><label><input type="radio" name="impactVideo" value="パケットロス"><span>選ぶ</span></label></td></tr>
+          <tr><th scope="row">🎮 オンラインゲーム</th><td><label><input type="radio" name="impactGame" value="通信速度"><span>選ぶ</span></label></td><td><label><input type="radio" name="impactGame" value="遅延"><span>選ぶ</span></label></td><td><label><input type="radio" name="impactGame" value="パケットロス"><span>選ぶ</span></label></td></tr>
+          <tr><th scope="row">🌐 Web閲覧</th><td><label><input type="radio" name="impactWeb" value="通信速度"><span>選ぶ</span></label></td><td><label><input type="radio" name="impactWeb" value="遅延"><span>選ぶ</span></label></td><td><label><input type="radio" name="impactWeb" value="パケットロス"><span>選ぶ</span></label></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <label class="field">
+      なぜそう思いましたか？
+      <textarea id="pairMemo" rows="3" placeholder="例：ゲームでは、押してからジャンプするまでの遅れが気になったから。"></textarea>
+    </label>
+    <div class="btn-row"><button class="btn btn-soft" id="showQualityHint" type="button" aria-expanded="false">ヒントを見る</button></div>
+    <div class="quality-hints hidden" id="qualityHints">
+      <div><strong>🎬 動画視聴</strong><p>通信速度とパケットロスの影響を受けやすい。高画質の動画では多くのデータを連続して受信する必要があります。</p></div>
+      <div><strong>🎮 オンラインゲーム</strong><p>遅延とパケットロスの影響を受けやすい。ボタン操作への反応の速さが重要です。</p></div>
+      <div><strong>🌐 Web閲覧</strong><p>通信速度と遅延の両方が影響する。ページを開くまでの反応と、画像などのデータ転送速度が関係します。</p></div>
+      <p class="hint-note">どの体験も、1つの値だけで決まるわけではありません。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>記録表</h3>
+    <p class="hint">送信するたびに自動で記録されます。</p>
+    <div class="table-wrap">
+      <table id="logTable">
+        <thead>
+          <tr><th>回</th><th>通信速度</th><th>遅延</th><th>パケットロス</th><th>送信にかかった時間</th><th>反応までの時間</th><th>届かなかった数</th></tr>
+        </thead>
+        <tbody><tr class="empty-row"><td colspan="7">まだ記録がありません。</td></tr></tbody>
+      </table>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="printBtn">ワークシートを印刷する</button>
+      <button class="btn" id="clearLogBtn">記録を消す</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 活用 ===================== -->
+<section id="t3" class="panel" role="tabpanel">
+
+  <div class="card intro">
+    <h2>③ どのネットワークを選ぶ？</h2>
+    <p>3つのネットワークがあります。<strong>答えは1つに決まりません。</strong>通信速度・遅延・パケットロスの<strong>どの値を根拠にしたか</strong>を書きましょう。</p>
+  </div>
+
+  <div class="net-cards" id="netCards"></div>
+
+  <div class="card">
+    <h3>選んで、理由を書こう</h3>
+    <div id="questionArea"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="judgeBtn">判定を見る</button>
+    </div>
+    <p class="status" id="judgeStatus"></p>
+  </div>
+
+  <div class="card exit">
+    <h3>まとめ・振り返り（Exit Ticket）</h3>
+    <p class="q">オンライン授業で映像や音声が途切れたとき、どのような原因が考えられるか。今日学んだ言葉を使って説明しよう。</p>
+    <p class="hint">「通信速度」「遅延」「パケットロス」のうち、<strong>少なくとも2つ</strong>の言葉を使って書きましょう。</p>
+    <textarea id="exitTicket" rows="5" placeholder="例：映像が止まったのは…"></textarea>
+    <div class="word-check" id="wordCheck">
+      <span class="word-chip" data-word="通信速度">通信速度</span>
+      <span class="word-chip" data-word="遅延">遅延</span>
+      <span class="word-chip" data-word="パケットロス">パケットロス</span>
+      <span class="word-count" id="wordCount">使った言葉：0 / 3</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="printBtn2">ワークシートを印刷する</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <p>情報Ⅰ「パケット通信と通信品質」授業用シミュレーター</p>
+</footer>
+
+<!-- 印刷専用エリア（画面には表示されません） -->
+<div id="printArea" aria-hidden="true"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
