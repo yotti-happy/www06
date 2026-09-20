@@ -39,53 +39,54 @@
 <!-- ===================== 体験1 ===================== -->
 <section id="t1" class="panel is-active" role="tabpanel">
 
-  <div class="card intro">
+  <div class="card intro t1-intro">
     <h2>① データはどうやって送られる？</h2>
     <p>大きな荷物を<strong>小包（パケット）に分けて</strong>送ると考えてみよう。パケットには「宛先」と「何番目か」の情報が付いています。
       パケットは<strong>別々の道（経路）</strong>を通ることがあるので、届く順番は入れかわることもあります。</p>
   </div>
 
-  <div class="card">
-    <h3>送るデータを選ぶ</h3>
-    <div class="datatype-switch" role="radiogroup" aria-label="送るデータの種類">
-      <label class="chip"><input type="radio" name="datatype" value="text" checked><span>文字メッセージ</span></label>
-      <label class="chip"><input type="radio" name="datatype" value="image"><span>画像（ドット絵）</span></label>
-    </div>
+  <div class="t1-workbench">
+    <div class="card t1-setup-card">
+      <span class="step-badge">1</span>
+      <h3>送るデータを選ぶ</h3>
+      <div class="datatype-switch" role="radiogroup" aria-label="送るデータの種類">
+        <label class="chip"><input type="radio" name="datatype" value="text" checked><span>文字メッセージ</span></label>
+        <label class="chip"><input type="radio" name="datatype" value="image"><span>画像（ドット絵）</span></label>
+      </div>
 
-    <div id="textPicker" class="picker">
-      <label class="field">
-        メッセージ（20文字くらいまで）
-        <input type="text" id="msgInput" maxlength="24" value="ネットワークはおもしろい">
+      <div id="textPicker" class="picker">
+        <label class="field">
+          メッセージ（20文字くらいまで）
+          <input type="text" id="msgInput" maxlength="24" value="ネットワークはおもしろい">
+        </label>
+      </div>
+
+      <div id="imagePicker" class="picker hidden">
+        <p class="field-label">画像を選ぶ</p>
+        <div class="art-choices" id="artChoices"></div>
+      </div>
+
+      <label class="checkline">
+        <input type="checkbox" id="dropOne">
+        <span>パケットを1つ、わざと届かないようにする</span>
       </label>
+      <p class="t1-next">選んだら、右の「送信する」を押そう →</p>
     </div>
 
-    <div id="imagePicker" class="picker hidden">
-      <p class="field-label">画像を選ぶ</p>
-      <div class="art-choices" id="artChoices"></div>
-    </div>
-
-    <label class="checkline">
-      <input type="checkbox" id="dropOne">
-      <span>パケットを1つ、わざと届かないようにする</span>
-    </label>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" id="sendBtn">送信する</button>
-      <button class="btn" id="resetBtn">はじめにもどる</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>作られたパケット</h3>
-    <p class="hint">データが分割され、1つずつに宛先と番号が付きました。</p>
-    <div class="packet-list" id="packetList"></div>
-  </div>
-
-  <div class="card">
-    <h3>ネットワークの中を通る</h3>
-    <p class="hint">パケットは3つの経路のどれかを通ります。通る道がちがうので、届く順番も変わります。</p>
-    <div class="net-wrap">
-      <svg id="netSvg" viewBox="0 0 660 270" role="img" aria-label="送信者からルータを経て受信者へパケットが流れる図">
+    <div class="card t1-network-card" id="networkExperience">
+      <span class="step-badge">2</span>
+      <div class="t1-network-heading">
+        <div>
+          <h3>ネットワークの中を通る</h3>
+          <p class="hint">3つの経路を通るので、届く順番が変わることがあります。</p>
+        </div>
+        <div class="btn-row t1-send-buttons">
+          <button class="btn btn-primary" id="sendBtn">送信する</button>
+          <button class="btn" id="resetBtn">もどる</button>
+        </div>
+      </div>
+      <div class="net-wrap">
+        <svg id="netSvg" viewBox="0 0 660 270" role="img" aria-label="送信者からルータを経て受信者へパケットが流れる図">
         <path class="route" id="routeA" d="M70,135 L250,48 L590,135"></path>
         <path class="route" id="routeB" d="M70,135 L250,135 L590,135"></path>
         <path class="route" id="routeC" d="M70,135 L250,222 L590,135"></path>
@@ -104,10 +105,20 @@
           <text x="590" y="150" class="sub">相手の端末</text>
         </g>
 
-        <g id="packetLayer"></g>
-      </svg>
+          <g id="packetLayer"></g>
+        </svg>
+      </div>
+      <p class="status" id="sendStatus">「送信する」を押してみよう。</p>
     </div>
-    <p class="status" id="sendStatus">「送信する」を押してみよう。</p>
+
+    <div class="card t1-packet-card">
+      <span class="step-badge">3</span>
+      <div class="t1-packet-heading">
+        <h3>作られたパケット</h3>
+        <p class="hint">データが分割され、1つずつに宛先と番号が付きました。</p>
+      </div>
+      <div class="packet-list" id="packetList"></div>
+    </div>
   </div>
 
   <div class="card">
@@ -245,8 +256,10 @@
           <div><h4 id="gameTitle">オンラインゲーム</h4><p>押してから動くまでの時間に注目</p></div>
         </div>
         <div class="game-stage" id="gameStage" aria-label="ジャンプゲーム">
-          <div class="game-target" aria-hidden="true">★</div>
-          <div class="game-character" id="gameCharacter" aria-hidden="true">●</div>
+          <div class="game-goal">障害物をジャンプでよけよう！</div>
+          <div class="game-delay-meter" aria-hidden="true"><span id="gameDelayFill"></span><em id="gameDelayText">操作の伝わり方</em></div>
+          <div class="game-character" id="gameCharacter" aria-hidden="true">🏃</div>
+          <div class="game-obstacle" id="gameObstacle" aria-hidden="true">▰</div>
           <div class="game-ground"></div>
           <div class="game-message" id="gameMessage" role="status">「ジャンプ！」を押してみよう</div>
         </div>

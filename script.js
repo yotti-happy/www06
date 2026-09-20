@@ -686,28 +686,58 @@ let jumpPending = false;
 async function jumpExperience() {
   if (jumpPending) return;
   jumpPending = true;
+  jumpBtn.disabled = true;
   const q = currentQuality();
   const character = $('#gameCharacter');
+  const obstacle = $('#gameObstacle');
   const message = $('#gameMessage');
-  message.textContent = q.latency >= 150 ? '操作を送信中…' : '';
+  const delayFill = $('#gameDelayFill');
+  const delayText = $('#gameDelayText');
+
+  character.classList.remove('is-jumping', 'is-hit');
+  obstacle.classList.remove('is-moving');
+  void obstacle.offsetWidth;
+  obstacle.classList.add('is-moving');
+  delayFill.style.transitionDuration = `${Math.max(q.latency, 20)}ms`;
+  delayFill.style.width = '0%';
+  void delayFill.offsetWidth;
+  delayFill.style.width = '100%';
+  delayText.textContent = `操作を送信中… ${q.latency} ms`;
+  message.textContent = 'ボタンは押されました';
 
   await wait(q.latency);
-  if (Math.random() * 100 < q.loss) {
-    message.textContent = '操作が届かなかった！';
+  const lost = Math.random() * 100 < q.loss;
+  if (lost) {
+    delayText.textContent = '操作が途中で消えた';
+    message.textContent = '操作が届かなかった！ ジャンプしません';
     $('#gameStage').classList.add('packet-missed');
-    await wait(900);
-    $('#gameStage').classList.remove('packet-missed');
-    message.textContent = 'もう一度押してみよう';
   } else {
-    message.textContent = '';
-    character.classList.remove('is-jumping');
-    void character.offsetWidth;
+    delayText.textContent = `操作が到着（${q.latency} ms）`;
     character.classList.add('is-jumping');
-    await wait(560);
-    character.classList.remove('is-jumping');
+    message.textContent = q.latency >= 220 ? 'ジャンプしたけれど、反応が遅い！' : 'すぐにジャンプ！';
   }
+
+  await wait(Math.max(0, 720 - q.latency));
+  if (lost || q.latency >= 220) {
+    character.classList.remove('is-jumping');
+    character.classList.add('is-hit');
+    message.textContent = lost ? '操作が届かず、障害物にぶつかった！' : '反応が遅れて、障害物にぶつかった！';
+  } else {
+    message.textContent = 'ジャンプ成功！ 障害物をよけられた';
+  }
+
+  await wait(850);
+  if (lost) {
+    $('#gameStage').classList.remove('packet-missed');
+  }
+  character.classList.remove('is-jumping', 'is-hit');
+  obstacle.classList.remove('is-moving');
+  delayFill.style.transitionDuration = '.15s';
+  delayFill.style.width = '0%';
+  delayText.textContent = `体験した遅延：${q.latency} ms ／ ロス：${q.loss}%`;
   showFeeling('game');
   jumpPending = false;
+  jumpBtn.disabled = false;
 }
 jumpBtn.addEventListener('click', jumpExperience);
 
