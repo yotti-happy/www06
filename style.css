@@ -331,8 +331,9 @@ main{max-width:1040px;margin:0 auto;padding:16px;}
 @keyframes lateJump{0%,100%{transform:translateY(0)}48%{transform:translateY(-20px)}}
 .game-character.is-hit{animation:gameHit .42s ease;}
 @keyframes gameHit{0%{transform:none}35%{transform:translateX(-9px) rotate(-18deg)}100%{transform:none}}
-.game-obstacle{position:absolute;left:55%;bottom:38px;color:#c65d32;font-size:2rem;line-height:1;z-index:1;}
-.game-finish{position:absolute;right:5%;bottom:38px;font-size:1.8rem;line-height:1;z-index:1;}
+.game-obstacle{position:absolute;right:-38px;bottom:38px;color:#c65d32;font-size:2rem;line-height:1;z-index:1;}
+.game-obstacle.is-moving{animation:obstacleRun .95s linear forwards;}
+@keyframes obstacleRun{from{right:-38px}to{right:112%}}
 .game-message{top:59%;}
 .game-stage.packet-missed{box-shadow:inset 0 0 0 3px rgba(217,83,79,.65);}
 
