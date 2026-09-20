@@ -858,6 +858,25 @@ const QUESTIONS = [
   { key: 'video', title: '動画を見るなら、どのネットワーク？' },
   { key: 'web',   title: 'Webページをたくさん見るなら、どのネットワーク？' }
 ];
+
+/* 用途ごとの授業用4段階判定。◎と○を正解として扱う。 */
+const NETWORK_RATINGS = {
+  video: {
+    A: { mark: '◎', reason: '通信速度が速く、パケットロスもないので、動画を安定して再生しやすい。' },
+    B: { mark: '○', reason: '通信速度は中程度だが、遅延が小さくパケットロスもないので、動画を見られる。' },
+    C: { mark: '△', reason: '通信速度は速いが、パケットロスで映像が乱れたり止まったりする可能性がある。' }
+  },
+  game: {
+    A: { mark: '△', reason: '通信速度は速いが、遅延が大きいため操作への反応が遅れやすい。' },
+    B: { mark: '◎', reason: '遅延が小さくパケットロスもないので、操作が素早く確実に届きやすい。' },
+    C: { mark: '×', reason: '遅延は小さいが、パケットロスによって操作が届かないことがある。' }
+  },
+  web: {
+    A: { mark: '○', reason: '反応開始には少し待つが、通信速度が速く画像などを短時間で受信できる。' },
+    B: { mark: '◎', reason: '遅延が小さくパケットロスもないため、ページを安定して表示しやすい。' },
+    C: { mark: '△', reason: '通信速度は速いが、パケットロスで画像の再読み込みが起こる可能性がある。' }
+  }
+};
 const BASIS = ['通信速度', '遅延', 'パケットロス'];
 
 const qArea = $('#questionArea');
@@ -869,7 +888,7 @@ QUESTIONS.forEach((q, qi) => {
   const choices = NETS.map((n) => `
     <label class="choice">
       <input type="radio" name="q${qi}" value="${n.id}">
-      <span>${n.id}</span>
+      <span><strong>${n.id}</strong><small class="choice-mark" aria-live="polite"></small></span>
     </label>`).join('');
 
   const basis = BASIS.map((b) => `
@@ -885,6 +904,18 @@ QUESTIONS.forEach((q, qi) => {
   qArea.appendChild(box);
 });
 
+qArea.addEventListener('change', (event) => {
+  if (!event.target.matches('input[type=radio]')) return;
+  const box = event.target.closest('.question');
+  $$('.choice', box).forEach((choice) => {
+    choice.classList.remove('rate-excellent', 'rate-good', 'rate-caution', 'rate-bad', 'is-answer');
+    $('.choice-mark', choice).textContent = '';
+  });
+  $('.q-feedback', box).className = 'q-feedback';
+  $('.q-feedback', box).textContent = '';
+  $('#judgeStatus').textContent = '選び直しました。「判定を見る」を押してください。';
+});
+
 $('#judgeBtn').addEventListener('click', () => {
   let answered = 0;
   $$('.question', qArea).forEach((box) => {
@@ -895,22 +926,34 @@ $('#judgeBtn').addEventListener('click', () => {
 
     if (!picked) {
       fb.textContent = 'まず A・B・C のどれかを選びましょう。';
+      fb.className = 'q-feedback show feedback-warn';
       return;
     }
     answered++;
     const basisChecked = $$('.basis', box).filter((c) => c.checked).map((c) => c.value);
-    const lines = NETS.map((n) => {
-      const r = judge(kind, n.speed, n.lat, n.loss);
-      const me = n.id === picked.value ? '←あなたの選択' : '';
-      return `${n.id}：${r.mark}（${r.text}）${me}`;
-    }).join('　／　');
+    $$('.choice', box).forEach((choice) => {
+      const input = $('input', choice);
+      const rating = NETWORK_RATINGS[kind][input.value];
+      choice.classList.remove('rate-excellent', 'rate-good', 'rate-caution', 'rate-bad', 'is-answer');
+      const rateClass = rating.mark === '◎' ? 'rate-excellent' : rating.mark === '○' ? 'rate-good' : rating.mark === '△' ? 'rate-caution' : 'rate-bad';
+      choice.classList.add(rateClass);
+      choice.classList.toggle('is-answer', input.checked);
+      $('.choice-mark', choice).textContent = rating.mark;
+    });
+    const pickedRating = NETWORK_RATINGS[kind][picked.value];
+    const isCorrect = pickedRating.mark === '◎' || pickedRating.mark === '○';
+    const isClose = pickedRating.mark === '△';
+    const verdictIcon = isCorrect ? '✓' : isClose ? '△' : '✕';
+    const verdictText = isCorrect ? '正解です' : isClose ? '惜しいです' : '見直しましょう';
     const basisMsg = basisChecked.length
       ? `根拠：${basisChecked.join('・')}`
       : '根拠にした値にもチェックを入れましょう。';
-    fb.textContent = `${lines}　｜　${basisMsg}　｜　答えは1つに決まりません。どの値を根拠にしたかが大切です。`;
+    fb.className = `q-feedback show ${isCorrect ? 'feedback-correct' : isClose ? 'feedback-close' : 'feedback-wrong'}`;
+    fb.innerHTML = `<strong class="answer-verdict">${verdictIcon} ${verdictText}：ネットワーク${picked.value} は ${pickedRating.mark}</strong>` +
+      `<span>${pickedRating.reason}</span><small>${basisMsg}</small>`;
   });
   $('#judgeStatus').textContent = answered === QUESTIONS.length
-    ? '3つとも選べました。理由も書いて、ペアで説明してみよう。'
+    ? '3つとも判定しました。◎・○・△・×と、その理由を確かめよう。'
     : '未回答のQがあります。';
 });
 
@@ -950,8 +993,9 @@ function buildPrint() {
     const picked = $('input[type=radio]:checked', box);
     const basis = $$('.basis', box).filter((c) => c.checked).map((c) => c.value).join('・') || '―';
     const reason = $('.reason', box).value || '';
+    const rating = picked ? NETWORK_RATINGS[QUESTIONS[i].key][picked.value].mark : '―';
     answers += `<p class="p-ans"><strong>Q${i + 1} ${esc(QUESTIONS[i].title)}</strong><br>` +
-               `選んだネットワーク：${picked ? picked.value : '―'}　／　根拠：${esc(basis)}<br>` +
+               `選んだネットワーク：${picked ? picked.value : '―'}　／　判定：${rating}　／　根拠：${esc(basis)}<br>` +
                `理由：${esc(reason)}</p>`;
   });
 

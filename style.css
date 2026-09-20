@@ -396,14 +396,28 @@ td{font-variant-numeric:tabular-nums;}
 .choice{position:relative;}
 .choice input{position:absolute;opacity:0;width:0;height:0;}
 .choice span{
-  display:inline-block;min-width:54px;text-align:center;padding:9px 14px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;gap:8px;min-width:74px;text-align:center;padding:9px 14px;border-radius:10px;
   border:2px solid var(--line);background:#fff;cursor:pointer;font-weight:700;
 }
 .choice input:checked + span{background:var(--main);border-color:var(--main);color:#fff;}
+.choice-mark{display:none;font-size:1.35rem;font-weight:800;line-height:1;}
+.choice.rate-excellent .choice-mark,.choice.rate-good .choice-mark,.choice.rate-caution .choice-mark,.choice.rate-bad .choice-mark{display:inline;}
+.choice.rate-excellent span{border-color:var(--good);background:#f2fbf6;color:var(--good);}
+.choice.rate-good span{border-color:#3f8cd8;background:#f1f7fd;color:#2a6fb5;}
+.choice.rate-caution span{border-color:#e0a800;background:#fffbe9;color:#9a6d00;}
+.choice.rate-bad span{border-color:var(--warn);background:var(--warn-soft);color:var(--warn);}
+.choice.is-answer span{outline:4px solid #1b2333;outline-offset:2px;}
+.choice.is-answer::after{content:"あなたの答え";display:block;margin-top:5px;text-align:center;font-size:.67rem;font-weight:700;color:var(--ink);}
 .basis-row{display:flex;gap:14px;flex-wrap:wrap;font-size:.9rem;margin-bottom:8px;}
 .basis-row label{display:flex;align-items:center;gap:6px;}
 .q-feedback{font-size:.9rem;margin:8px 0 0;padding:9px 12px;border-radius:10px;background:var(--main-soft);color:var(--main-dark);display:none;}
 .q-feedback.show{display:block;}
+.q-feedback .answer-verdict,.q-feedback span,.q-feedback small{display:block;}
+.q-feedback .answer-verdict{font-size:1.05rem;margin-bottom:4px;}
+.q-feedback small{margin-top:5px;color:var(--ink-soft);}
+.q-feedback.feedback-correct{background:#eefaf3;border:2px solid #9bd0b3;color:#176b40;}
+.q-feedback.feedback-close,.q-feedback.feedback-warn{background:#fff9df;border:2px solid #ead17b;color:#765600;}
+.q-feedback.feedback-wrong{background:var(--warn-soft);border:2px solid #e7a5a2;color:#9d302d;}
 
 .exit{background:#f2fbf6;border-color:#bfe6cf;}
 .exit .q{font-weight:700;}
