@@ -695,7 +695,9 @@ async function jumpExperience() {
   const delayText = $('#gameDelayText');
 
   character.classList.remove('is-jumping', 'is-late-jump', 'is-hit');
-  character.getAnimations().forEach((animation) => animation.cancel());
+  obstacle.classList.remove('is-moving');
+  void obstacle.offsetWidth;
+  obstacle.classList.add('is-moving');
   delayFill.style.transitionDuration = `${Math.max(q.latency, 20)}ms`;
   delayFill.style.width = '0%';
   void delayFill.offsetWidth;
@@ -705,53 +707,31 @@ async function jumpExperience() {
 
   await wait(q.latency);
   const lost = Math.random() * 100 < q.loss;
-  const stageWidth = $('#gameStage').clientWidth;
-  const clearDistance = Math.max(130, stageWidth * 0.58);
-  const crashDistance = Math.max(90, stageWidth * 0.42);
-  let movement;
   if (lost) {
     delayText.textContent = '操作が途中で消えた';
-    message.textContent = '操作が届かなかった！ そのまま障害物へ…';
+    message.textContent = '操作が届かなかった！ ジャンプしません';
     $('#gameStage').classList.add('packet-missed');
-    movement = character.animate([
-      { transform: 'translate(0, 0)' },
-      { transform: `translate(${crashDistance}px, 0)` }
-    ], { duration: 650, easing: 'linear', fill: 'forwards' });
   } else {
     delayText.textContent = `操作が到着（${q.latency} ms）`;
-    if (q.latency >= 220) {
-      message.textContent = '反応が遅い！ ジャンプが間に合う？';
-      movement = character.animate([
-        { transform: 'translate(0, 0)' },
-        { transform: `translate(${crashDistance * .65}px, -18px)` },
-        { transform: `translate(${crashDistance}px, 0)` }
-      ], { duration: 650, easing: 'ease-in-out', fill: 'forwards' });
-    } else {
-      message.textContent = 'すぐにジャンプ！';
-      movement = character.animate([
-        { transform: 'translate(0, 0)', offset: 0 },
-        { transform: `translate(${clearDistance * .2}px, -28px)`, offset: .2 },
-        { transform: `translate(${clearDistance * .5}px, -88px)`, offset: .5 },
-        { transform: `translate(${clearDistance * .78}px, -30px)`, offset: .78 },
-        { transform: `translate(${clearDistance}px, 0)`, offset: 1 }
-      ], { duration: 1000, easing: 'ease-in-out', fill: 'forwards' });
-    }
+    character.classList.add(q.latency >= 220 ? 'is-late-jump' : 'is-jumping');
+    message.textContent = q.latency >= 220 ? 'ジャンプしたけれど、反応が遅い！' : 'すぐにジャンプ！';
   }
 
-  await movement.finished;
+  await wait(Math.max(0, 680 - q.latency));
   if (lost || q.latency >= 220) {
+    character.classList.remove('is-jumping', 'is-late-jump');
     character.classList.add('is-hit');
     message.textContent = lost ? '操作が届かず、障害物にぶつかった！' : '反応が遅れて、障害物にぶつかった！';
   } else {
-    message.textContent = 'ジャンプ成功！ 障害物の反対側へ着地！';
+    message.textContent = 'ジャンプ成功！ 障害物を飛び越えた！';
   }
 
-  await wait(900);
+  await wait(600);
   if (lost) {
     $('#gameStage').classList.remove('packet-missed');
   }
   character.classList.remove('is-jumping', 'is-late-jump', 'is-hit');
-  character.getAnimations().forEach((animation) => animation.cancel());
+  obstacle.classList.remove('is-moving');
   delayFill.style.transitionDuration = '.15s';
   delayFill.style.width = '0%';
   delayText.textContent = `体験した遅延：${q.latency} ms ／ ロス：${q.loss}%`;
